@@ -193,7 +193,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   ylab("Wins")
 ```
 
-![plot of chunk sp1](Rgraphics-figure/sp1-1.png)
 
 Additional Customizations: Trend Line
 ========================================================
@@ -211,7 +210,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   geom_smooth()
 ```
 
-![plot of chunk sp2](Rgraphics-figure/sp2-1.png)
 
 Additional Customizations: Trend Line
 ========================================================
@@ -229,7 +227,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   geom_smooth(method = "lm")
 ```
 
-![plot of chunk sp3](Rgraphics-figure/sp3-1.png)
 
 Additional Customizations: Trend Line without Confidence Band
 ========================================================
@@ -249,7 +246,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   geom_smooth(method = "lm", se = FALSE)
 ```
 
-![plot of chunk sp4](Rgraphics-figure/sp4-1.png)
 
 Additional Customizations: Grouping
 ========================================================
@@ -300,7 +296,6 @@ ggplot(afl_data, aes(x = For, y = W, shape = Team_f)) +
   ylab("Wins")
 ```
 
-![plot of chunk sp5](Rgraphics-figure/sp5-1.png)
 
 Additional Customizations: Grouping
 ========================================================
@@ -317,7 +312,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_f)) +
   ylab("Wins")
 ```
 
-![plot of chunk sp6](Rgraphics-figure/sp6-1.png)
 
 Additional Customizations: Grouping & Trend Line
 ========================================================
@@ -337,7 +331,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_f)) +
   geom_smooth(method = "lm")
 ```
 
-![plot of chunk sp7](Rgraphics-figure/sp7-1.png)
 
 Additional Customizations: Grouping & Trend Line
 ========================================================
@@ -353,7 +346,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   geom_smooth(method = "lm")
 ```
 
-![plot of chunk sp8a](Rgraphics-figure/sp8a-1.png)
 
 We moved `colour = Team_f` out of the main aesthetics and into the aesthetics for `geom_point()`. This means that the `geom_smooth()` function is ignorant of the colour aesthetics passed to `geom_point()`; as such, it doesn't create a separate trend line for each team.
 
@@ -380,7 +372,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa)) +
   geom_smooth(method = "lm")
 ```
 
-![plot of chunk sp8](Rgraphics-figure/sp8-1.png)
 
 Additional Customizations: Custom Colors
 ========================================================
@@ -410,7 +401,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa)) +
   scale_colour_brewer(palette = "Dark2")
 ```
 
-![plot of chunk sp9](Rgraphics-figure/sp9-1.png)
 
 
 Additional Customizations: Custom Colors 
@@ -433,7 +423,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   scale_fill_brewer(palette = "Dark2")
 ```
 
-![plot of chunk sp10](Rgraphics-figure/sp10-1.png)
 
 Additional Customizations: Custom Colors 
 ========================================================
@@ -468,7 +457,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   geom_smooth(method = "lm", colour = "peachpuff") 
 ```
 
-![plot of chunk sp11a](Rgraphics-figure/sp11a-1.png)
 
 Note that `colour =` is NOT included inside `aes()` This makes customization a bit more challenging.
 
@@ -506,7 +494,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   scale_fill_manual(values = afl_secondary_colours)
 ```
 
-![plot of chunk sp11b](Rgraphics-figure/sp11b-1.png)
 
 Additional Customizations: Custom Colors 
 ========================================================
@@ -529,7 +516,6 @@ ggplot(afl_data, aes(x = For, y = W, fill = Team_wa)) +
   scale_shape_discrete()
 ```
 
-![plot of chunk sp11c](Rgraphics-figure/sp11c-1.png)
 
 Additional Customizations: Legends 
 ========================================================
@@ -549,7 +535,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   scale_fill_manual(values = afl_secondary_colours, name = "Team")
 ```
 
-![plot of chunk sp12](Rgraphics-figure/sp12-1.png)
 
 Additional Customizations: Titles 
 ========================================================
@@ -572,12 +557,10 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   subtitle = "2000-2021")
 ```
 
-![plot of chunk sp13](Rgraphics-figure/sp13-1.png)
 
 Additional Customizations: Jitter 
 ========================================================
 
-![plot of chunk sp14pre](Rgraphics-figure/sp14pre-1.png)
 
 We're getting even more pedantic now. Wins is technically not a continuous variable (it's a count variable). As such, some of the points on the y-axis obscure other points. If we want to improve our ability to see each individual point, we can apply jitter by replacing
 
@@ -603,12 +586,10 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   subtitle = "2000-2021")
 ```
 
-![plot of chunk sp14](Rgraphics-figure/sp14-1.png)
 
 Additional Customizations: Themes 
 ========================================================
 
-![plot of chunk sp15pre](Rgraphics-figure/sp15pre-1.png)
 
 Ok, this looks pretty good. But are you going to be submitting it for publication? There is some "chart junk" here. If you have ever heard of Edward Tufte, you probably know what that is. If we wanted to please Tufte and remove *all* "chart junk", we could use the `tufte` theme from the `ggthemes` package.
 
@@ -631,12 +612,10 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   theme_tufte()
 ```
 
-![plot of chunk sp15](Rgraphics-figure/sp15-1.png)
 
 Additional Customizations: Themes 
 ========================================================
 
-![plot of chunk sp16pre](Rgraphics-figure/sp16pre-1.png)
 
 That may be a bit extreme! My favorite theme for publication-ready figures is the `cowplot` theme from the `cowplot` package. 
 
@@ -661,7 +640,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   theme_cowplot()
 ```
 
-![plot of chunk sp16](Rgraphics-figure/sp16-1.png)
 
 Additional Customizations: Themes 
 ========================================================
@@ -682,7 +660,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   theme_few()
 ```
 
-![plot of chunk sp17](Rgraphics-figure/sp17-1.png)
 
 Additional Customizations: Themes 
 ========================================================
@@ -703,7 +680,6 @@ ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
   theme_minimal()
 ```
 
-![plot of chunk sp18](Rgraphics-figure/sp18-1.png)
 
 
 Additional Customizations: Facets 
@@ -726,7 +702,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   facet_wrap(~ Year)
 ```
 
-![plot of chunk sp19](Rgraphics-figure/sp19-1.png)
 
 Additional Customizations: Facets 
 ========================================================
@@ -748,7 +723,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   facet_grid(WA_Team ~ Year)
 ```
 
-![plot of chunk sp19a](Rgraphics-figure/sp19a-1.png)
 
 Additional Customizations: More Themes 
 ========================================================
@@ -770,7 +744,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   facet_wrap(~ Year)
 ```
 
-![plot of chunk sp20](Rgraphics-figure/sp20-1.png)
 
 
 Additional Customizations: More Themes 
@@ -793,7 +766,6 @@ ggplot(afl_data, aes(x = For, y = W)) +
   facet_wrap(~ Year)
 ```
 
-![plot of chunk sp21](Rgraphics-figure/sp21-1.png)
 
 
 Scatterplot Matrices
@@ -829,7 +801,6 @@ ggpairs(afl_data, columns = c(3, 5, 7, 9, 11), ggplot2::aes(colour = Team_wa, fi
   theme_cowplot()
 ```
 
-![plot of chunk splom](Rgraphics-figure/splom-1.png)
 
 Histograms
 ========================================================
@@ -841,7 +812,6 @@ ggplot(afl_data, aes(x = Pt_diff)) +
   theme_cowplot()
 ```
 
-![plot of chunk hist](Rgraphics-figure/hist-1.png)
 
 Histograms with Stratification
 ========================================================
@@ -854,7 +824,6 @@ ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) +
   theme_cowplot()
 ```
 
-![plot of chunk histstrat](Rgraphics-figure/histstrat-1.png)
 
 Density Plots
 ========================================================
@@ -866,7 +835,6 @@ ggplot(afl_data, aes(x = Pt_diff)) +
   theme_cowplot()
 ```
 
-![plot of chunk dens](Rgraphics-figure/dens-1.png)
 
 Density Plots with Stratification
 ========================================================
@@ -879,7 +847,6 @@ ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) +
   theme_cowplot()
 ```
 
-![plot of chunk densstrat](Rgraphics-figure/densstrat-1.png)
 
 
 Density Plots with Stratification and Transparency
@@ -893,7 +860,6 @@ ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) +
   theme_cowplot()
 ```
 
-![plot of chunk densstratalpha](Rgraphics-figure/densstratalpha-1.png)
 
 Boxplots
 ========================================================
@@ -912,7 +878,6 @@ ggplot(afl_data, aes(x = Year_f, y = For)) +
   theme_cowplot()
 ```
 
-![plot of chunk box](Rgraphics-figure/box-1.png)
 
 Boxplots
 ========================================================
@@ -931,7 +896,6 @@ ggplot(afl_data, aes(x = Year_f, y = For)) +
   scale_x_discrete(guide = guide_axis(n.dodge = 2))
 ```
 
-![plot of chunk box2](Rgraphics-figure/box2-1.png)
 
 
 Violin Plots
@@ -947,7 +911,6 @@ ggplot(afl_data, aes(x = Year_f, y = For)) +
   scale_x_discrete(guide = guide_axis(n.dodge = 2))
 ```
 
-![plot of chunk violin](Rgraphics-figure/violin-1.png)
 
 
 Spaghetti Plots
@@ -964,7 +927,6 @@ ggplot(afl_data, aes(x = Year, y = W, group = Team_f, colour = Team_wa)) +
   theme_cowplot()
 ```
 
-![plot of chunk spaghetti](Rgraphics-figure/spaghetti-1.png)
 
 
 Bar Charts
@@ -982,7 +944,6 @@ ggplot(afl_data, aes(x = Team_f, y = W)) +
   theme(axis.text.x = element_text(angle = 75, hjust = 1, vjust = 1))
 ```
 
-![plot of chunk bar1](Rgraphics-figure/bar1-1.png)
 
 Bar Charts
 ========================================================
@@ -1000,7 +961,6 @@ ggplot(afl_data, aes(x = Team_f, y = W)) +
   theme(axis.text.x = element_text(angle = 75, hjust = 1, vjust = 1))
 ```
 
-![plot of chunk bar2](Rgraphics-figure/bar2-1.png)
 
 
 Bar Charts
@@ -1019,7 +979,6 @@ ggplot(afl_data, aes(x = Team_f, y = W)) +
   coord_flip()
 ```
 
-![plot of chunk bar3](Rgraphics-figure/bar3-1.png)
 
 Bar Charts
 ========================================================
@@ -1037,7 +996,6 @@ ggplot(afl_data, aes(x = forcats::fct_rev(Team_f), y = W)) +
   coord_flip()
 ```
 
-![plot of chunk bar4](Rgraphics-figure/bar4-1.png)
 
 Bar Charts
 ========================================================
@@ -1056,7 +1014,6 @@ ggplot(afl_data, aes(x = forcats::fct_reorder(.f = Team_f, .x = W, .fun = mean),
   xlab("Team")
 ```
 
-![plot of chunk bar4a](Rgraphics-figure/bar4a-1.png)
 
 Bar Charts
 ========================================================
@@ -1074,7 +1031,6 @@ ggplot(afl_data %>% filter(Team %in% c("West Coast", "Fremantle")), aes(x = Team
   scale_fill_ordinal()
 ```
 
-![plot of chunk bar5](Rgraphics-figure/bar5-1.png)
 
 Annotations
 ========================================================
@@ -1094,7 +1050,6 @@ ggplot(afl_data %>% filter(Team %in% c("West Coast", "Fremantle")), aes(x = Team
   annotate("text", x = 2, y = 2, label = "West Coast", colour = "#f2a900", size = 12.5)
 ```
 
-![plot of chunk bar6](Rgraphics-figure/bar6-1.png)
 
 Patchwork
 ========================================================
@@ -1172,7 +1127,6 @@ Put the four plots together in a 2x2 grid
 (plot1 | plot2) / (plot3 | plot4)
 ```
 
-![plot of chunk patchwork](Rgraphics-figure/patchwork-1.png)
 
 Export
 ========================================================

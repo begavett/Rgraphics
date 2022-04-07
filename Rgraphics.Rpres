@@ -1,0 +1,1006 @@
+R Graphics Using the ggplot2 Package
+========================================================
+author: Brandon Gavett
+date: 2022-04-07
+autosize: true
+
+Workshop Goals
+========================================================
+
+We will explore the `ggplot2` package and how it can be used to generate graphics to accompany research output.
+
+Code and data are available at https://github.com/begavett/Rgraphics
+
+
+Required Packages
+========================================================
+
+```{r init}
+# if necessary: install.packages("pacman")
+library(pacman)
+p_load(tidyverse, haven, ggplot2, ggthemes, cowplot, GGally, patchwork, psych)
+```
+
+- `tidyverse`: a suite of data tools
+- `haven`: imports data
+- `ggplot2`: the focus of today's workshop
+- `ggthemes`: a ggplot2 add-on that provides pre-made graphical styles
+- `cowplot`: a good supplementary graphics package
+- `GGally`: another companion to ggplot
+- `patchwork`: package for combining plots together
+- `psych`: statistical tools relevant to psychological research
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(fig.width = 12, fig.height = 6)
+theme_set(theme(text = element_text(size = 20)))
+```
+
+Import Data
+========================================================
+
+Source: https://www.afltables.com
+
+```{r data}
+afl_data <- read_csv("afl_team_data_2000_2021.csv")
+```
+
+```{r view}
+describe(afl_data)
+```
+
+```{r played}
+table(afl_data$P)
+```
+
+Filter out teams who did not play 22 games
+
+```{r gp22}
+afl_data <- afl_data %>%
+  filter(P == 22)
+```
+
+Scatterplots
+========================================================
+
+We will begin learning about many of the primary ggplot2 features using scatterplots.
+
+For scatterplots we need, at a minimum, 2 continuous variables. We could also add
+
+- Grouping variable(s)
+- Trend lines
+    - Confidence bands
+    - Various methods for smoothing/fitting
+- Chart aesthetics
+- And more
+
+Grammar of Graphics
+========================================================
+
+The style for writing ggplot2 syntax is a bit non-intuitive at first, but it is very systematic. Once you learn the basic structure of ggplot2 syntax, you can do almost anything.
+
+Step 1. Specify data and aesthetics
+
+```{r gg1, eval = FALSE}
+ggplot(data = x, mapping = aes(x = PREDICTOR, y = OUTCOME))
+```
+
+These are global aesthetics that apply to the entire plot (you'll see what I mean later).
+
+Running this by itself would produce an empty plot.
+
+Grammar of Graphics
+========================================================
+
+Step 2. Add the main plotting layer 
+
+```{r gg2, eval = FALSE}
+ggplot(data = x, mapping = aes(x = PREDICTOR, y = OUTCOME)) +
+  geom_point()
+```
+
+This takes the values stored in `PREDICTOR` and `OUTCOME` (which, here, must be columns in a data frame called `x`) and plots them as points using `geom_point()`
+
+Grammar of Graphics
+========================================================
+
+Step 3. Adding additional customizations
+
+```{r gg3, eval = FALSE}
+ggplot(data = x, mapping = aes(x = PREDICTOR, y = OUTCOME)) +
+  geom_point() +
+  xlab("Predictor Variable") +
+  ylab("Outcome Variable")
+```
+
+This provides custom labels for the x-axis (`xlab`) and y-axis (`ylab`), overriding the default (which would be to label the x-axis as `PREDICTOR` and the y-axis as `OUTCOME`)
+
+Note that each new layer gets added to the previous layer with a `+` sign.
+
+Scatterplots
+========================================================
+
+We'll begin by plotting the pairwise association between two continuous variables in our data set: Points For (`For`) and Wins (`W`).
+
+```{r sp1}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins")
+```
+
+Additional Customizations: Trend Line
+========================================================
+
+The default is to use either a generalized additive model (GAM) or loess for smoothing (the decision is automatically made by ggplot depending on the sample size)
+
+`geom_smooth()`
+
+```{r sp2}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth()
+```
+
+Additional Customizations: Trend Line
+========================================================
+
+However, for many purposes, we may want to use a linear trend line (e.g., if we are planning to use linear regression).
+
+`geom_smooth(method = "lm")`
+
+```{r sp3}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm")
+```
+
+Additional Customizations: Trend Line without Confidence Band
+========================================================
+
+Notice that ggplot automatically added a +/- 1SE confidence band around the trend line.
+
+To remove this:
+
+`geom_smooth(method = "lm", se = FALSE)`
+
+```{r sp4}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm", se = FALSE)
+```
+
+Additional Customizations: Grouping
+========================================================
+
+What if we wanted our plot to differentiate between teams?
+
+We should first understand how teams are coded in our data set.
+
+```{r teamtr}
+str(afl_data$Team)
+```
+
+The `Team` variable is a character.
+
+Because we want to treat Team as a categorical variable for plotting purposes, we should first create a factor variable.
+
+```{r teamfactor}
+afl_data$Team_f <- factor(afl_data$Team)
+```
+
+```{r teamfstr}
+str(afl_data$Team_f)
+```
+
+Additional Customizations: Grouping
+========================================================
+
+One way to group by a categorical variable is to use different shapes for the points.
+
+`shape = Team_f`
+
+```{r sp5}
+ggplot(afl_data, aes(x = For, y = W, shape = Team_f)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins")
+```
+
+Additional Customizations: Grouping
+========================================================
+
+Another way to group by a categorical variable is to use different colors for the points.
+
+`colour = Team_f`
+
+```{r sp6}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_f)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins")
+```
+
+Additional Customizations: Grouping & Trend Line
+========================================================
+
+What if we wanted to include both the linear trend line and the grouping by team?
+
+`colour = Team_f`
+
+`geom_smooth(method = "lm")`
+
+```{r sp7}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_f)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm")
+```
+
+Additional Customizations: Grouping & Trend Line
+========================================================
+
+Was that plot too messy? One way to clean it up is to make a single trend line for all of the data, ignoring Team.
+
+```{r sp8a}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_point(aes(colour = Team_f)) +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm")
+```
+
+We moved `colour = Team_f` out of the main aesthetics and into the aesthetics for `geom_point()`. This means that the `geom_smooth()` function is ignorant of the colour aesthetics passed to `geom_point()`; as such, it doesn't create a separate trend line for each team.
+
+Additional Customizations: Grouping & Trend Line
+========================================================
+
+Another way we could make our visualizations cleaner would be to focus on WA teams.
+
+```{r wa}
+afl_data <- afl_data %>%
+  mutate(Team_wa = case_when(!Team %in% c("West Coast", "Fremantle") ~ "Other",
+                             TRUE ~ Team) %>% factor())
+```
+
+`colour = Team_wa`
+
+```{r sp8}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm")
+```
+
+Additional Customizations: Custom Colors
+========================================================
+
+https://colorbrewer2.org/
+
+![colorbrewer2.org](Brewer.png)
+
+
+Additional Customizations: Custom Colors
+========================================================
+
+https://colorbrewer2.org/
+
+```{r cb}
+?scale_colour_brewer
+```
+
+```{r sp9}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_brewer(palette = "Dark2")
+```
+
+
+Additional Customizations: Custom Colors 
+========================================================
+
+What if we wanted the confidence band to be color-coded as well? 
+
+`fill = Team_wa`
+
+`scale_fill_brewer(palette = "Dark2")`
+
+```{r sp10}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_brewer(palette = "Dark2") +
+  scale_fill_brewer(palette = "Dark2")
+```
+
+Additional Customizations: Custom Colors 
+========================================================
+
+Note:
+
+- Colour
+
+`colour = Team_wa` sets `Team_wa` as the variable used to do the color-coding of the points.
+
+`scale_colour_brewer` defines the color palette that is mapped to the `Team_wa` variable.
+
+- Fill
+
+`fill = Team_wa` sets `Team_wa` as the variable used to fill the confidence bands with color
+
+`scale_fill_brewer` defines the fill palette that is mapped to the `Team_wa` variable.
+
+Additional Customizations: Custom Colors 
+========================================================
+
+If you want to use your own custom colors, you can set them manually.
+
+Check the Addins dropdown menu above for a comprehensive list of all colors in R.
+
+```{r sp11a}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point(colour = "burlywood4") +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm", colour = "peachpuff") 
+```
+
+Note that `colour =` is NOT included inside `aes()` This makes customization a bit more challenging.
+
+Additional Customizations: Custom Colors 
+========================================================
+
+One alternative is to specify colours in their own objects.
+
+```{r manualcol}
+afl_primary_colours <- c("West Coast" = "#003087",
+                         "Fremantle" = "#2a0d54",
+                         "Other" = "peachpuff")
+
+afl_secondary_colours <- c("West Coast" = "#f2a900",
+                         "Fremantle" = "#a2acb4",
+                         "Other" = "burlywood4")
+```
+
+Additional Customizations: Custom Colors 
+========================================================
+
+`scale_colour_manual(values = afl_primary_colours)`
+
+`scale_fill_manual(values = afl_secondary_colours)`
+
+```{r sp11b}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours) +
+  scale_fill_manual(values = afl_secondary_colours)
+```
+
+Additional Customizations: Custom Colors 
+========================================================
+
+You can also color the points according to a continuous variable if desired.
+
+`shape = Team_wa`
+
+`scale_colour_distiller(palette = "Reds")` Note: distiller instead of brewer!
+
+```{r sp11c}
+ggplot(afl_data, aes(x = For, y = W, fill = Team_wa)) +
+  geom_point(aes(shape = Team_wa, colour = Pt_diff), size = 3) +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_distiller(palette = "Reds", direction = 1) +
+  scale_fill_manual(values = afl_secondary_colours) +
+  scale_shape_discrete()
+```
+
+Additional Customizations: Legends 
+========================================================
+
+If you're picky, you may not like the label that's been applied to the legend. We can fix that.
+
+`name = "Team"`
+
+```{r sp12}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team")
+```
+
+Additional Customizations: Titles 
+========================================================
+
+As we get closer to perfecting our plot, let's add a title.
+
+`ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams, 2000-2021",
+  subtitle = "2000-2021")`
+
+```{r sp13}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021")
+```
+
+Additional Customizations: Jitter 
+========================================================
+
+```{r sp14pre, echo = FALSE}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_point() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021")
+```
+
+We're getting even more pedantic now. Wins is technically not a continuous variable (it's a count variable). As such, some of the points on the y-axis obscure other points. If we want to improve our ability to see each individual point, we can apply jitter by replacing
+
+`geom_point()`
+
+with
+
+`geom_jitter()`
+
+Additional Customizations: Jitter 
+========================================================
+
+```{r sp14}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021")
+```
+
+Additional Customizations: Themes 
+========================================================
+
+```{r sp15pre, echo = FALSE}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021")
+```
+
+Ok, this looks pretty good. But are you going to be submitting it for publication? There is some "chart junk" here. If you have ever heard of Edward Tufte, you probably know what that is. If we wanted to please Tufte and remove *all* "chart junk", we could use the `tufte` theme from the `ggthemes` package.
+
+`theme_tufte()`
+
+Additional Customizations: Themes 
+========================================================
+
+```{r sp15}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_tufte()
+```
+
+Additional Customizations: Themes 
+========================================================
+
+```{r sp16pre, echo = FALSE}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_tufte()
+```
+
+That may be a bit extreme! My favorite theme for publication-ready figures is the `cowplot` theme from the `cowplot` package. 
+
+`theme_cowplot()`
+
+Additional Customizations: Themes 
+========================================================
+
+`theme_cowplot()`
+
+```{r sp16}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_cowplot()
+```
+
+Additional Customizations: Themes 
+========================================================
+
+`theme_few()`
+
+```{r sp17}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_few()
+```
+
+Additional Customizations: Themes 
+========================================================
+
+`theme_minimal()`
+
+```{r sp18}
+ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_minimal()
+```
+
+
+Additional Customizations: Facets 
+========================================================
+
+Want to separate your data into multiple smaller plots? Use a facet plot.
+
+`facet_wrap(~ Year)`
+
+```{r sp19}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  ggtitle("Year-to-Year Association Between Points and Wins",
+  subtitle = "2000-2021") +
+  theme_cowplot() +
+  facet_wrap(~ Year)
+```
+
+Additional Customizations: Facets 
+========================================================
+
+Use `facet_grid` if you have multiple dimensions of faceting.
+
+`facet_grid(WA_Team ~ Year)`
+
+```{r sp19a}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  ggtitle("Year-to-Year Association Between Points and Wins",
+  subtitle = "2000-2021") +
+  theme_cowplot() +
+  facet_grid(WA_Team ~ Year)
+```
+
+Additional Customizations: More Themes 
+========================================================
+
+The `ggthemes` package has themes that attempt to reproduce the styles used in professional publications, like *The Economist*
+
+`theme_economist()`
+
+```{r sp20}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  ggtitle("Year-to-Year Association Between Points and Wins",
+  subtitle = "2000-2021") +
+  theme_economist() +
+  facet_wrap(~ Year)
+```
+
+
+Additional Customizations: More Themes 
+========================================================
+
+And  *The Wall Street Journal*
+
+`theme_wsj()`
+
+```{r sp21}
+ggplot(afl_data, aes(x = For, y = W)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  ggtitle("Year-to-Year Association Between Points and Wins",
+  subtitle = "2000-2021") +
+  theme_wsj() +
+  facet_wrap(~ Year)
+```
+
+
+Scatterplot Matrices
+========================================================
+
+Visualize correlation matrices (correlograms) in your data.
+
+```{r names}
+names(afl_data)
+```
+
+Scatterplot Matrices
+========================================================
+
+`ggpairs()` comes from the `GGally` package
+
+```{r splom}
+ggpairs(afl_data, columns = c(3, 5, 7, 9, 11), ggplot2::aes(colour = Team_wa, fill = Team_wa)) +
+  scale_colour_manual(values = afl_secondary_colours) +
+  scale_fill_manual(values = afl_secondary_colours) +
+  theme_cowplot()
+```
+
+Histograms
+========================================================
+
+```{r hist}
+ggplot(afl_data, aes(x = Pt_diff)) + 
+  geom_histogram(fill = "peachpuff", colour = "burlywood4") +
+  theme_cowplot()
+```
+
+Histograms with Stratification
+========================================================
+
+```{r histstrat}
+ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) + 
+  geom_histogram() +
+  scale_fill_manual(values = afl_secondary_colours) +
+  theme_cowplot()
+```
+
+Density Plots
+========================================================
+
+```{r dens}
+ggplot(afl_data, aes(x = Pt_diff)) + 
+  geom_density() +
+  theme_cowplot()
+```
+
+Density Plots with Stratification
+========================================================
+
+```{r densstrat}
+ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) + 
+  geom_density() +
+  scale_fill_manual(values = afl_secondary_colours) +
+  theme_cowplot()
+```
+
+
+Density Plots with Stratification and Transparency
+========================================================
+
+```{r densstratalpha}
+ggplot(afl_data, aes(x = Pt_diff, fill = Team_wa)) + 
+  geom_density(alpha = .5) +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  theme_cowplot()
+```
+
+Boxplots
+========================================================
+
+```{r catyr}
+afl_data$Year_f <- factor(afl_data$Year)
+```
+
+```{r box}
+ggplot(afl_data, aes(x = Year_f, y = For)) + 
+  geom_boxplot() +
+  xlab("Year") +
+  ylab("Points For") +
+  theme_cowplot()
+```
+
+Boxplots
+========================================================
+
+Axis labels too scrunched together?
+
+`scale_x_discrete(guide = guide_axis(n.dodge = 2))`
+
+```{r box2}
+ggplot(afl_data, aes(x = Year_f, y = For)) + 
+  geom_boxplot() +
+  xlab("Year") +
+  ylab("Points For") +
+  theme_cowplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+
+Violin Plots
+========================================================
+
+```{r violin}
+ggplot(afl_data, aes(x = Year_f, y = For)) + 
+  geom_violin() +
+  xlab("Year") +
+  ylab("Points For") +
+  theme_cowplot() +
+  scale_x_discrete(guide = guide_axis(n.dodge = 2))
+```
+
+
+Spaghetti Plots
+========================================================
+
+Spaghetti plots are useful for plotting longitudinal data, grouped by individual cases (in this instance, Teams)
+
+```{r spaghetti}
+ggplot(afl_data, aes(x = Year, y = W, group = Team_f, colour = Team_wa)) +
+  geom_line(size = 2) +
+  scale_colour_manual(values = afl_secondary_colours, name = "Team") +
+  ylab("Wins") +
+  theme_cowplot()
+```
+
+
+Bar Charts
+========================================================
+
+For some data, like bar charts, you may want to plot *summaries* of data, rather than individual data points.
+
+`stat_summary(fun = mean, geom = "bar")`
+
+```{r bar1}
+ggplot(afl_data, aes(x = Team_f, y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  theme_cowplot() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, vjust = 1))
+```
+
+Bar Charts
+========================================================
+
+With summaries of data, we often want confidence intervals as well.
+
+`stat_summary(fun.data = mean_se, geom = "errorbar")`
+
+```{r bar2}
+ggplot(afl_data, aes(x = Team_f, y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") +
+  theme_cowplot() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, vjust = 1))
+```
+
+
+Bar Charts
+========================================================
+
+Sometimes you may want to flip the orientation of your plots.
+
+`coord_flip()` (works on all plots, not just bar charts)
+
+```{r bar3}
+ggplot(afl_data, aes(x = Team_f, y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") +
+  theme_cowplot() +
+  coord_flip()
+```
+
+Bar Charts
+========================================================
+
+Want the y-axis in alphabetical order?
+
+`x = forcats::fct_rev(Team_f)`
+
+```{r bar4}
+ggplot(afl_data, aes(x = forcats::fct_rev(Team_f), y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") +
+  theme_cowplot() +
+  coord_flip()
+```
+
+Bar Charts
+========================================================
+
+Want the y-axis in descending order?
+
+`x = forcats::fct_reorder(.f = Team_f, .x = W, .fun = mean)`
+
+```{r bar4a}
+ggplot(afl_data, aes(x = forcats::fct_reorder(.f = Team_f, .x = W, .fun = mean), y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") +
+  theme_cowplot() +
+  coord_flip() +
+  xlab("Team")
+```
+
+Bar Charts
+========================================================
+
+Or maybe we'd prefer to stratify by another variable (e.g., Year), rather than aggregate.
+
+`position = "dodge"`
+
+```{r bar5}
+ggplot(afl_data %>% filter(Team %in% c("West Coast", "Fremantle")), aes(x = Team_f, y = W, fill = Year_f)) +
+  geom_col(position = "dodge", colour = "black") +
+  theme_cowplot() +
+  theme(axis.text.x = element_text(angle = 75, hjust = 1, vjust = 1)) +
+  scale_fill_ordinal()
+```
+
+Annotations
+========================================================
+
+It is possible to add text as a new plot layer.
+
+`annotate("text", x = 1, y = 2, label = "Fremantle"`
+
+```{r bar6}
+ggplot(afl_data %>% filter(Team %in% c("West Coast", "Fremantle")), aes(x = Team_f, y = W, fill = Year_f)) +
+  geom_col(position = "dodge", colour = "black") +
+  theme_cowplot() +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank()) +
+  scale_fill_ordinal(name = "Year") +
+  annotate("text", x = 1, y = 2, label = "Fremantle", colour = "#2a0d54", size = 12.5) +
+  annotate("text", x = 2, y = 2, label = "West Coast", colour = "#f2a900", size = 12.5)
+```
+
+Patchwork
+========================================================
+
+What if you want to put multiple plots together in the same window? The `patchwork` package makes it easy.
+
+Let's pick 4 plots that we want to combine, and assign each of them to a different object.
+
+```{r plot1}
+plot1 <- ggplot(afl_data, aes(x = For, y = W, colour = Team_wa, fill = Team_wa)) +
+  geom_jitter() +
+  xlab("Points For") +
+  ylab("Wins") +
+  geom_smooth(method = "lm") +
+  scale_colour_manual(values = afl_primary_colours, name = "Team") +
+  scale_fill_manual(values = afl_secondary_colours, name = "Team") +
+  ggtitle("Association Between Points and Wins in WA Teams and Other AFL Teams",
+  subtitle = "2000-2021") +
+  theme_cowplot()
+```
+
+Patchwork
+========================================================
+
+`plot2`
+
+```{r plot2}
+plot2 <- ggplot(afl_data, aes(x = Year, y = W, group = Team_f, colour = Team_wa)) +
+  geom_line(size = 2) +
+  scale_colour_manual(values = afl_secondary_colours, name = "Team") +
+  ylab("Wins") +
+  theme_cowplot()
+```
+
+
+Patchwork
+========================================================
+
+`plot3`
+
+```{r plot3}
+plot3 <- ggplot(afl_data, aes(x = forcats::fct_rev(Team_f), y = W)) +
+  stat_summary(fun = mean, geom = "bar") +
+  stat_summary(fun.data = mean_se, geom = "errorbar") +
+  theme_cowplot() +
+  coord_flip()
+```
+
+Patchwork
+========================================================
+
+`plot4`
+
+```{r plot4}
+plot4 <- ggplot(afl_data %>% filter(Team %in% c("West Coast", "Fremantle")), aes(x = Team_f, y = W, fill = Year_f)) +
+  geom_col(position = "dodge", colour = "black") +
+  theme_cowplot() +
+  theme(axis.title.x = element_blank(), axis.text.x = element_blank()) +
+  scale_fill_ordinal(name = "Year") +
+  annotate("text", x = 1, y = 2, label = "Fremantle", colour = "#2a0d54", size = 12.5) +
+  annotate("text", x = 2, y = 2, label = "West Coast", colour = "#f2a900", size = 12.5)
+```
+
+Patchwork
+========================================================
+
+Put the four plots together in a 2x2 grid
+
+```{r patchwork, fig.height = 12, fig.width = 24}
+(plot1 | plot2) / (plot3 | plot4)
+```
+
+Export
+========================================================
+
+Saving plots
+
+`ggsave()`
+
+```{r ggsave}
+ggsave("Figure 1.pdf", plot4, width = 210, height = 297, units = "mm")
+```
+
+Supported filetypes include:
+  - eps
+  - ps
+  - tex
+  - pdf
+  - jpeg
+  - tiff
+  - png
+  - bmp
+  - svg
+  - wmf
